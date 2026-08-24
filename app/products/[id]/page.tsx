@@ -12,7 +12,7 @@ const ProductIdPage = async({ params }:{ params: Promise<{ id : string  }>}) => 
         <div>
             <div>
                 <h1>ไม่พบสินค้า</h1>
-            </div>
+            </div> 
         </div>
     )
    }
