@@ -32,6 +32,7 @@ const Navbar = async() => {
                         <Link href={'/signup'}>Signup</Link>
                     </div>
                 )}
+                <Link href={'/orders'}>ประวัติคำสั่งซื้อ</Link>
             </div>
         </div>
     </nav>

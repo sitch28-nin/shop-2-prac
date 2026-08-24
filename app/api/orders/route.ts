@@ -140,3 +140,28 @@ export const POST = async(request: NextRequest) => {
         { status: 201 }
     );
 }
+
+export const GET = async() => {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return NextResponse.json(
+            { error: "กรุณาเข้าสู่ระบบ" },
+            { status: 401 }
+        );
+    }
+    
+    const { data: orders, error} = await supabase.from('orders').select(`id, status, total, created_at, order_items (id, product_id, quantity, price_at_purchase)`).eq('user_id',  user.id).order("created_at", { ascending: false });
+
+    if (error) {
+        console.error(error);
+        return NextResponse.json(
+            { error: "ไม่สามารถอ่านประวัติคำสั่งซื้อได้" },
+            { status: 500 }
+        )
+    }
+
+    return NextResponse.json({ orders });
+}
