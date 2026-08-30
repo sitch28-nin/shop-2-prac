@@ -47,6 +47,24 @@ const OrderDetailPage = () => {
     if (error) return <p>{error}</p>;
     if  (!order) return <p>กำลังโหลด...</p>;
 
+    const handlepay = async () => {
+        const response = await fetch(`/api/orders/${order.id}`, {
+            method: "POST",
+            credentials: "include"
+        })
+
+        const body = await response.json();
+        if (!response.ok) {
+            setError(body.error ?? "ไม่สามารถชำระเงินได้");
+            return;
+        }
+
+        setOrder((currentOrder) => 
+            currentOrder
+                ? {...currentOrder, ...body.order}
+                : body.order
+        );
+    };
 
   return (
     <div>
@@ -62,6 +80,14 @@ const OrderDetailPage = () => {
                 <p>ราคาตอนซื้อ: {item.price_at_purchase} บาท</p>
             </div>
         ))}
+
+        <div>
+            {order.status === "pending" && (
+                <button onClick={handlepay} className="cursor-pointer">
+                ชำระเงิน
+                </button>
+            )}
+        </div>
     </div>
   )
 }
