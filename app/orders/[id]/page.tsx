@@ -22,6 +22,7 @@ const OrderDetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const [order, setOrder] = useState<Order | null>(null);
     const [error, setError] = useState("");
+    const [paying, setPaying] = useState(false);
 
     useEffect(() => {
         const loadOrder = async() => {
@@ -48,22 +49,33 @@ const OrderDetailPage = () => {
     if  (!order) return <p>กำลังโหลด...</p>;
 
     const handlepay = async () => {
-        const response = await fetch(`/api/orders/${order.id}`, {
+        if (paying || order.status !== "pending") return;
+        
+        setPaying(true);
+        setError("");
+
+        try {
+            const response = await fetch(`/api/orders/${order.id}`, {
             method: "POST",
             credentials: "include"
-        })
+            })
 
-        const body = await response.json();
-        if (!response.ok) {
-            setError(body.error ?? "ไม่สามารถชำระเงินได้");
-            return;
+            const body = await response.json();
+            if (!response.ok) {
+                setError(body.error ?? "ไม่สามารถชำระเงินได้");
+                return;
+            }
+
+            setOrder((currentOrder) => 
+                currentOrder
+                    ? {...currentOrder, ...body.order}
+                    : body.order
+            );
+        } catch {
+            setError("ไม่สามารถเชื่อมต่อ server ได้");
+        } finally {
+            setPaying(false);
         }
-
-        setOrder((currentOrder) => 
-            currentOrder
-                ? {...currentOrder, ...body.order}
-                : body.order
-        );
     };
 
   return (
@@ -83,8 +95,8 @@ const OrderDetailPage = () => {
 
         <div>
             {order.status === "pending" && (
-                <button onClick={handlepay} className="cursor-pointer">
-                ชำระเงิน
+                <button onClick={handlepay} className="cursor-pointer" disabled={paying}>
+                    {paying ? " กำลังชำระเงิน..." : "ชำระเงิน"}
                 </button>
             )}
         </div>

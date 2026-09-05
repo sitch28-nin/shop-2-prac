@@ -60,6 +60,14 @@ export const POST = async(_request: NextRequest, {params}:{params: Promise<{id :
 
     if (updateError || !updateOrder) {
         console.error(updateError);
+
+        if (updateError?.code == "PGRST116") {
+            return NextResponse.json(
+                { error: "ออเดอร์นี้ถูกชำระเงินไปแล้วหรือกำลังถูกดำเนินการ" },
+                { status: 409 }
+            );
+        }
+        
         return NextResponse.json(
             { error: "เปลี่ยนสถานะออเดอร์ไม่สำเร็จ" },
             { status: 500}
